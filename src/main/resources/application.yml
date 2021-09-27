@@ -1,0 +1,42 @@
+# 项目相关配置
+sysconf:
+  max-view-ip: 127.0.0.1
+  max-view-port: 80
+  max-view-user: user
+  max-view-pwd: B@ndwe@ver
+
+  top-server-ai-url: http://58.213.24.42:6347/ea-environ/xry/data/deviceDataReceive
+  top-server-device-url: http://58.213.24.42:6347/ea-environ/xry/data/extDeviceStatusReceive
+
+
+
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为8080
+  port: 8088
+  #port: 443
+  servlet:
+    # 应用的访问路径
+    context-path: /
+
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+
+scheduled:
+  #fixedDelay: 3000
+  #initialDelay: 1200
+  fixedDelay: 60000
+  initialDelay: 120000
+
+# 日志配置
+logging:
+  level:
+    com.newIntel: debug
+    org.springframework: warn
+
+
