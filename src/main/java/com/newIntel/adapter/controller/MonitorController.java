@@ -1,5 +1,7 @@
 package com.newIntel.adapter.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.newIntel.adapter.Cache.CacheAlarmMap;
 import com.newIntel.adapter.bean.*;
 import com.newIntel.adapter.config.SysConfComponent;
 import com.newIntel.adapter.constant.Constant;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,9 +75,9 @@ public class MonitorController {
     }
 
     @PostMapping("/api/v1/measvalue-si")
-    AjaxResult pushSiData(@RequestBody List<Map<String,Object>> mpList){
-        //log.info("try to get SI value:"+String.valueOf(mpList));
-        //TODO SEND MAXVIEW DATA TO UPSIDE SERVER
+    AjaxResult pushSiData(@RequestBody List<MaxViewSIData> mpList){
+        log.info("try to get SI value:"+String.valueOf(mpList));
+
         return AjaxResult.success("ok");
     }
 
@@ -87,12 +90,48 @@ public class MonitorController {
     }
 
     @PostMapping("api/v1/new-alarms")
-    AjaxResult pushNewAlarmData(@RequestBody List<Map<String,Object>> mpList){
+    AjaxResult pushNewAlarmData(@RequestBody List<MaxViewAlarm> mpList){
         //log.info("try to get new Alarm:"+String.valueOf(mpList));
+        CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
+        for(MaxViewAlarm alarm:mpList){
+           String objId = alarm.getObjectId();
+           if(!Constant.FIRE_OBJ_SET.contains(objId)) continue;
+           mp.put(objId,alarm);
+        }
         return AjaxResult.success("ok");
     }
 
+    @PostMapping("api/v1/updated-alarms")
+    AjaxResult pushUpatedAlarmData(@RequestBody List<MaxViewAlarm> mpList){
+        //log.info("try to get new Alarm:"+String.valueOf(mpList));
+        CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
+        for(MaxViewAlarm alarm:mpList){
+            String objId = alarm.getObjectId();
+            if(!Constant.FIRE_OBJ_SET.contains(objId)) continue;
+            mp.put(objId,alarm);
+        }
+        return AjaxResult.success("ok");
+    }
 
+    @PostMapping("/api/v1/structure-obj")
+    AjaxResult pushStructData(@RequestBody List<List<Map<String,Object>>> mpList){
+        mpList.toString();
+        List<MaxViewCallRecord> resList = new ArrayList<>();
+        for(List<Map<String,Object>> l : mpList){
+            if(l==null || l.size() ==0) continue;
+            String objid = (String) l.get(0).get("objectId");//
+            //提取电话记录
+            //todo get objid
+            if(objid != "123445") continue;
+            for(Map<String,Object> mp : l){
+                ObjectMapper mapper = new ObjectMapper();
+                MaxViewCallRecord record = mapper.convertValue(mp, MaxViewCallRecord.class);
+                resList.add(record);
+            }
+            aggDataService.aggStructData(resList);
+        }
+        return AjaxResult.success("ok");
+    }
 }
 
 

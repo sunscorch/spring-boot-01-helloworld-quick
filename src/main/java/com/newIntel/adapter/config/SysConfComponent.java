@@ -21,4 +21,6 @@ public class SysConfComponent
 
     String TopServerDeviceUrl = null;
 
+    String TopServerPhoneUrl = null;
+
 }

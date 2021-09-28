@@ -3,14 +3,11 @@ package com.newIntel.adapter.service.impl;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.newIntel.adapter.Cache.CacheAIMap;
-import com.newIntel.adapter.Cache.CacheDIMap;
-import com.newIntel.adapter.bean.AiStatus;
-import com.newIntel.adapter.bean.DeviceStatus;
-import com.newIntel.adapter.bean.MaxViewAIData;
-import com.newIntel.adapter.bean.MaxViewDIStatus;
+import com.newIntel.adapter.Cache.*;
+import com.newIntel.adapter.bean.*;
 import com.newIntel.adapter.constant.Constant;
 import com.newIntel.adapter.service.GetCacheDataService;
+import com.newIntel.adapter.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -70,6 +67,94 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
         return resList;
     }
 
+
+
+    @Override
+    public List<ItcStatus> getItcStatus() {
+        CacheSIMap siMp= CacheSIMap.getCacheMap();
+        List<ItcStatus> res = new ArrayList<>();
+        for (Map.Entry<String, MaxViewSIData> entry : siMp.entrySet()) {
+            String objId = entry.getKey();
+            MaxViewSIData maxViewSIData = entry.getValue();
+            ItcStatus itcStatus = new ItcStatus();
+
+            //电话号码位最后两位
+            itcStatus.setPhoneSip(objId.substring(8,10));
+            //itcStatus.setWarningMessage("");
+            itcStatus.setWarningTime(LocalDateTime.now());
+
+            if((System.currentTimeMillis()-maxViewSIData.getTime())/1000L/60L > Constant.staleThreshold){
+                itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_OFF);
+            }
+            itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_ON);
+            res.add(itcStatus);
+        }
+        return res;
+    }
+
+    @Override
+    public List<CallRecord> getCallRecords()  {
+        CacheStructQueue q = CacheStructQueue.getBlockingQueue();
+        List<CallRecord> res = new ArrayList<>();
+        while(q.size() != 0){
+            log.info("the blocking queue has "+ q.size()+ " elements");
+            MaxViewCallRecord record = null;
+            try {
+                 record = q.take();
+                //todo need to map fromid to object id
+                CallRecord r = new CallRecord();
+                String callSip = record.getFromTid();
+                String beCallSip = record.getToIid();
+                String callDevice = "13"+callSip+"60"+callSip+callSip;
+                String beCallDevice = "13"+beCallSip+"60"+beCallSip+beCallSip;
+                r.setCallDevice(callDevice);
+                r.setCallSip(callSip);
+                r.setBecallDevice(beCallDevice);
+                r.setBecallSip(beCallSip);
+                r.setStartTime(record.getStartTime());
+                r.setAnswerTime(record.getStartTime());
+                String startTime = r.getStartTime();
+                try {
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    LocalDateTime time = LocalDateTime.parse(startTime, dtf);
+                    LocalDateTime endTime = time.plusSeconds(record.getSeconds());
+                    r.setStatus(Utils.tranlatePhoneStatus(record.getStatus()));
+                    r.setEndTime(endTime);
+                }catch (Exception e){
+                    log.error(e.getMessage());
+                    log.error("fail to parse date time");
+                }
+                res.add(r);
+            }catch (Exception e){
+                log.error(e.getMessage());
+                log.error("fail to pop out element..." );
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public List<FireDeviceStatus> getAlarms() {
+        CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
+        List<FireDeviceStatus> res = new ArrayList<>();
+        for(String id : Constant.FIRE_OBJ_SET){
+            LocalDateTime time = LocalDateTime.now();
+            FireDeviceStatus device = new FireDeviceStatus();
+            if(mp.contains(id) && mp.get(id).getCleared().equals("false")){
+                device.setDeviceStatus("1");
+            }else{
+                //if we are in cleared state
+                if(mp.contains(id) && mp.get(id).getCleared().equals("true")) mp.remove(id);
+                device.setDeviceStatus("0");
+            }
+            device.setDeviceCode(id);
+            device.setMessage(mp.get(id).getAdditionalText());
+            device.setMonitorTime(time);
+            res.add(device);
+        }
+        return res;
+    }
+
     private AiStatus checkSatleData(AiStatus aiStatus){
         long curTime = Instant.now().getEpochSecond();
 
@@ -115,13 +200,13 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
 
     private DeviceStatus checkandUpateDeviceStatus(MaxViewDIStatus maxViewDIStatus){
 
-        long staleThreshold = 5L;
+
         long curTime = Instant.now().getEpochSecond();
         DeviceStatus deviceStatus = new DeviceStatus();
         Long  switchStatusArriveTime = maxViewDIStatus.getSwitchStatusArriveTime();
 
 
-        if(switchStatusArriveTime != null && (curTime-switchStatusArriveTime/1000L)/60L >staleThreshold){
+        if(switchStatusArriveTime != null && (curTime-switchStatusArriveTime/1000L)/60L >Constant.staleThreshold){
             deviceStatus.setWaterPumpStatus(Constant.DEVICE_OFFLINE);
         }
 

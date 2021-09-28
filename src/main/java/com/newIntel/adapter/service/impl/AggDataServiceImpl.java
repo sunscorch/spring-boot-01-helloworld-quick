@@ -2,9 +2,9 @@ package com.newIntel.adapter.service.impl;
 
 import com.newIntel.adapter.Cache.CacheAIMap;
 import com.newIntel.adapter.Cache.CacheDIMap;
-import com.newIntel.adapter.bean.AiStatus;
-import com.newIntel.adapter.bean.MaxViewDIStatus;
-import com.newIntel.adapter.bean.MaxViewAIData;
+import com.newIntel.adapter.Cache.CacheSIMap;
+import com.newIntel.adapter.Cache.CacheStructQueue;
+import com.newIntel.adapter.bean.*;
 import com.newIntel.adapter.constant.Constant;
 import com.newIntel.adapter.service.AggDataService;
 import org.slf4j.Logger;
@@ -17,7 +17,8 @@ import java.util.List;
 @Service
 public class AggDataServiceImpl implements AggDataService {
     private static final Logger log = LoggerFactory.getLogger(AggDataServiceImpl.class);
-    private static byte[] AIlock = new byte[0];
+    private static final byte[] AIlock = new byte[0];
+
     @Override
     public void aggAIdata(List<MaxViewAIData> mpList) {
         if (mpList.size() == 0) {
@@ -88,6 +89,24 @@ public class AggDataServiceImpl implements AggDataService {
                 mp.put(locationID, maxViewDiStatus);
             }
 
+        }
+    }
+
+    @Override
+    public void aggSIdata(List<MaxViewSIData> mpList) {
+        CacheSIMap mp = CacheSIMap.getCacheMap();
+        for (MaxViewSIData data : mpList) {
+            String objID = data.getObjectId();
+            data.setTime(System.currentTimeMillis());
+            mp.put(objID, data);
+        }
+    }
+
+    @Override
+    public void aggStructData(List<MaxViewCallRecord> mplist) {
+        CacheStructQueue q = CacheStructQueue.getBlockingQueue();
+        for(MaxViewCallRecord record : q){
+            q.add(record);
         }
     }
 
@@ -195,7 +214,7 @@ public class AggDataServiceImpl implements AggDataService {
             maxViewDiStatus.setSwitchStatus(Constant.DEVICE_ON);
         }
 
-        if (data.getCv().equals(Constant.MAXIEW_SWITCH_STATUS_OFF)){
+        if (data.getCv().equals(Constant.MAXIEW_SWITCH_STATUS_OFF)) {
             maxViewDiStatus.setSwitchStatus(Constant.DEVICE_CLOSE);
         }
         maxViewDiStatus.setSwitchStatusArriveTime(data.getTime());

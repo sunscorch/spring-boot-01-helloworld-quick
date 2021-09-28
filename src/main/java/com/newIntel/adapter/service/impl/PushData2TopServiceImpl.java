@@ -1,11 +1,14 @@
 package com.newIntel.adapter.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.newIntel.adapter.bean.AiStatus;
-import com.newIntel.adapter.bean.DeviceStatus;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.newIntel.adapter.Cache.CacheStructQueue;
+import com.newIntel.adapter.bean.*;
 import com.newIntel.adapter.config.SysConfComponent;
 import com.newIntel.adapter.service.GetCacheDataService;
 import com.newIntel.adapter.service.PushData2TopService;
+import com.newIntel.adapter.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -87,5 +93,75 @@ public class PushData2TopServiceImpl implements PushData2TopService {
         HttpEntity<String> entity = new HttpEntity<String>(jsonString,headers);
         String result = restTemplate.postForObject(url, entity, String.class);
         log.info("finish sending to top server get request result :" + result);
+    }
+
+    @Override
+    public void sendITCStatus() {
+        List<ItcStatus> itcStatusList = getCacheDataService.getItcStatus();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        String url = sysConfComponent.getTopServerPhoneUrl();
+
+        HttpHeaders headers = new HttpHeaders();
+        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+        headers.setContentType(type);
+
+        String jsonString ;
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            ObjectNode obj = mapper.createObjectNode();
+            obj.put("event","PUSH_DEVICE_STATUS");
+            obj.putPOJO("data",itcStatusList);
+            jsonString = obj.toString();
+        }catch(Exception e){
+            log.error(e.getMessage());
+            log.error("failed json is" + itcStatusList.toString());
+            throw e;
+        }
+
+        log.info("send to top server itc status data : "+ jsonString);
+        HttpEntity<String> entity = new HttpEntity<String>(jsonString,headers);
+        String result = restTemplate.postForObject(url, entity, String.class);
+        log.info("finish sending to top server get request result :" + result);
+
+    }
+
+
+
+    @Override
+    public void sendCallRecords() throws Exception {
+       List<CallRecord> res = getCacheDataService.getCallRecords();
+
+       if(res == null || res.size()==0){
+           log.info("there is no call records now, brake the send request");
+           return;
+       }
+        RestTemplate restTemplate = new RestTemplate();
+
+        String url = sysConfComponent.getTopServerPhoneUrl();
+
+        HttpHeaders headers = new HttpHeaders();
+        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+        headers.setContentType(type);
+
+        String jsonString ;
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            ObjectNode obj = mapper.createObjectNode();
+            obj.put("event","PUSH_TALK_RECORD");
+            obj.putPOJO("data",res);
+            jsonString = obj.toString();
+        }catch(Exception e){
+            log.error(e.getMessage());
+            log.error("failed json is" + res.toString());
+            throw e;
+        }
+
+        log.info("send to top server call record data : "+ jsonString);
+        HttpEntity<String> entity = new HttpEntity<String>(jsonString,headers);
+        String result = restTemplate.postForObject(url, entity, String.class);
+        log.info("finish sending to top server get request result :" + result);
+
     }
 }
