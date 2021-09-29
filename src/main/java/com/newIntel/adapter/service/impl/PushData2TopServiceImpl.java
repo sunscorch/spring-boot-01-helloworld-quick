@@ -164,4 +164,39 @@ public class PushData2TopServiceImpl implements PushData2TopService {
         log.info("finish sending to top server get request result :" + result);
 
     }
+
+    @Override
+    public void sendFireDeviceStatus() throws Exception {
+        List<FireDeviceStatus> dataList = getCacheDataService.getAlarms();
+
+        if(dataList == null || dataList.size()==0){
+            log.info("there is no fire device now, break the send request");
+            return;
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        String url = sysConfComponent.getTopServerFireAlarmUrl();
+
+        HttpHeaders headers = new HttpHeaders();
+        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+        headers.setContentType(type);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String jsonString ;
+        try{
+            jsonString = mapper.writeValueAsString(dataList);
+        }catch(Exception e){
+            log.error(e.getMessage());
+            log.error("failed json is" + dataList.toString());
+            throw e;
+        }
+
+        log.info("send to top server fire alarm data : "+ jsonString);
+        HttpEntity<String> entity = new HttpEntity<String>(jsonString,headers);
+        String result = restTemplate.postForObject(url, entity, String.class);
+        log.info("finish sending to top server  result :" + result);
+
+    }
 }

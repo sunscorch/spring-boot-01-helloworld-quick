@@ -10,4 +10,5 @@ public interface PushData2TopService {
      void sendDeviceData() throws Exception;
      void sendITCStatus() throws Exception;
      void sendCallRecords() throws  Exception;
+     void sendFireDeviceStatus() throws Exception;
 }

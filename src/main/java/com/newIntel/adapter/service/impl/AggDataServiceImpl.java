@@ -105,7 +105,7 @@ public class AggDataServiceImpl implements AggDataService {
     @Override
     public void aggStructData(List<MaxViewCallRecord> mplist) {
         CacheStructQueue q = CacheStructQueue.getBlockingQueue();
-        for(MaxViewCallRecord record : q){
+        for(MaxViewCallRecord record : mplist){
             q.add(record);
         }
     }

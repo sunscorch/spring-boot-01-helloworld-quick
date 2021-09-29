@@ -39,19 +39,34 @@ public class MonitorController {
     @Autowired
     private PushData2TopService pushData2TopService;
 
+
+
     @GetMapping("/test")
     List<AiStatus> getAiData() throws Exception {
         log.info("try to get some AIdata");
         log.info("device status is" + getCacheDataService.getDeviceStatus() );
         //pushData2TopService.sendDeviceData();
         return getCacheDataService.getAiData();
-
     }
+
+    @GetMapping("/test2")
+    void getAiData1() throws Exception {
+
+        pushData2TopService.sendFireDeviceStatus();
+        //pushData2TopService.sendDeviceData();
+    }
+
+    @GetMapping("/test3")
+    void getAiData2() throws Exception {
+
+        pushData2TopService.sendCallRecords();
+        //pushData2TopService.sendDeviceData();
+    }
+
     //api/v1/measvalue-ai
     @PostMapping("/api/v1/measvalue-ai")
     AjaxResult pushAIData(@RequestBody List<MaxViewAIData> mpList) {
         log.info("try to get AI value:"+String.valueOf(mpList));
-         //TODO SEND MAXVIEW DATA TO UPSIDE SERVER
          aggDataService.aggAIdata(mpList);
          return AjaxResult.success("ok");
 
@@ -63,7 +78,6 @@ public class MonitorController {
         TopServerControlResult res = new TopServerControlResult();
         res.setContrrolResult(topServerDoData.getControl());
         res.setDeviceMac(topServerDoData.getDeviceMac());
-
 
         try {
             controlMaxViewService.controlSwitch(topServerDoData);
@@ -101,7 +115,7 @@ public class MonitorController {
         return AjaxResult.success("ok");
     }
 
-    @PostMapping("api/v1/updated-alarms")
+    @PostMapping("api/v1/cleared-alarms")
     AjaxResult pushUpatedAlarmData(@RequestBody List<MaxViewAlarm> mpList){
         //log.info("try to get new Alarm:"+String.valueOf(mpList));
         CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
@@ -122,10 +136,11 @@ public class MonitorController {
             String objid = (String) l.get(0).get("objectId");//
             //提取电话记录
             //todo get objid
-            if(objid != "123445") continue;
+            String obj = sysConfComponent.getPhoneCallObjId();
+            if(!objid.equals(obj)) continue;
             for(Map<String,Object> mp : l){
                 ObjectMapper mapper = new ObjectMapper();
-                MaxViewCallRecord record = mapper.convertValue(mp, MaxViewCallRecord.class);
+                MaxViewCallRecord record = mapper.convertValue(mp.get("cv"), MaxViewCallRecord.class);
                 resList.add(record);
             }
             aggDataService.aggStructData(resList);

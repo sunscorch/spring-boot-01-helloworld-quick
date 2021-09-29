@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @Data
@@ -17,9 +18,9 @@ public class CallRecord {
     private String startTime;
 
     private String answerTime;
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime endTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date endTime;
     private String status;
 
 }

@@ -23,4 +23,8 @@ public class SysConfComponent
 
     String TopServerPhoneUrl = null;
 
+    String TopServerFireAlarmUrl = null;
+
+    String PhoneCallObjId = null;
+
 }

@@ -15,13 +15,18 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class GetCacheDataServiceImpl implements GetCacheDataService {
+    private static Object alarmLock = new Object();
+
     private static final Logger log = LoggerFactory.getLogger(GetCacheDataServiceImpl.class);
     @Override
     public List<AiStatus> getAiData() {
@@ -81,7 +86,9 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
             //电话号码位最后两位
             itcStatus.setPhoneSip(objId.substring(8,10));
             //itcStatus.setWarningMessage("");
-            itcStatus.setWarningTime(LocalDateTime.now());
+            LocalDateTime time = LocalDateTime.now();
+            Date t = Date.from(time.atZone(Constant.DEFAULT_ZONE).toInstant());
+            itcStatus.setWarningTime(t);
 
             if((System.currentTimeMillis()-maxViewSIData.getTime())/1000L/60L > Constant.staleThreshold){
                 itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_OFF);
@@ -115,11 +122,15 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
                 r.setAnswerTime(record.getStartTime());
                 String startTime = r.getStartTime();
                 try {
+
+
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     LocalDateTime time = LocalDateTime.parse(startTime, dtf);
                     LocalDateTime endTime = time.plusSeconds(record.getSeconds());
                     r.setStatus(Utils.tranlatePhoneStatus(record.getStatus()));
-                    r.setEndTime(endTime);
+                    Date et = Date.from(endTime.atZone(Constant.DEFAULT_ZONE).toInstant());
+
+                    r.setEndTime(et);
                 }catch (Exception e){
                     log.error(e.getMessage());
                     log.error("fail to parse date time");
@@ -140,7 +151,7 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
         for(String id : Constant.FIRE_OBJ_SET){
             LocalDateTime time = LocalDateTime.now();
             FireDeviceStatus device = new FireDeviceStatus();
-            if(mp.contains(id) && mp.get(id).getCleared().equals("false")){
+            if(mp.contains(id) && (mp.get(id).getCleared().equals("false")||mp.get(id).getCleared()==null)){
                 device.setDeviceStatus("1");
             }else{
                 //if we are in cleared state
@@ -149,7 +160,8 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
             }
             device.setDeviceCode(id);
             device.setMessage(mp.get(id).getAdditionalText());
-            device.setMonitorTime(time);
+            Date t = Date.from(time.atZone(Constant.DEFAULT_ZONE).toInstant());
+            device.setMonitorTime(t);
             res.add(device);
         }
         return res;
