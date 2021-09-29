@@ -9,4 +9,5 @@ public class MaxViewAlarm {
     private long time;
     private String additionalText;
     private String cleared;
+    private String alarmName;
 }

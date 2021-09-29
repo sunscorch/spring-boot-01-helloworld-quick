@@ -16,4 +16,19 @@ public class CronService {
         pushData2TopService.sendAiData();
         //pushData2TopService.sendDeviceData();
     }
+
+    @Scheduled(fixedDelayString = "${scheduled.fixedDelay}",initialDelayString = "${scheduled.initialDelay}"  )
+    public void sendItcStatus2TopServer() throws Exception{
+        pushData2TopService.sendITCStatus();
+    }
+
+    @Scheduled(fixedDelayString = "${scheduled.fixedDelay}",initialDelayString = "${scheduled.initialDelay}"  )
+    public void sendCallRecord2TopServer() throws Exception{
+        pushData2TopService.sendCallRecords();
+    }
+
+    @Scheduled(fixedDelayString = "${scheduled.fixedDelay}",initialDelayString = "${scheduled.initialDelay}"  )
+    public void sendFireDeviceStatus2TopServer() throws Exception{
+        pushData2TopService.sendFireDeviceStatus();
+    }
 }

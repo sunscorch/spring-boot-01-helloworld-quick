@@ -123,7 +123,6 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
                 String startTime = r.getStartTime();
                 try {
 
-
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     LocalDateTime time = LocalDateTime.parse(startTime, dtf);
                     LocalDateTime endTime = time.plusSeconds(record.getSeconds());
@@ -151,15 +150,21 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
         for(String id : Constant.FIRE_OBJ_SET){
             LocalDateTime time = LocalDateTime.now();
             FireDeviceStatus device = new FireDeviceStatus();
-            if(mp.contains(id) && (mp.get(id).getCleared().equals("false")||mp.get(id).getCleared()==null)){
-                device.setDeviceStatus("1");
+            if(mp.containsKey(id)){
+                //not clear
+                device.setMessage(mp.get(id).getAlarmName()+":" +mp.get(id).getAdditionalText());
+                if(mp.get(id).getCleared() != null && mp.get(id).getCleared().equals("false")) device.setDeviceStatus("1");
+                else {
+                    device.setDeviceStatus("0");
+                    device.setMessage(mp.get(id).getAdditionalText());
+                    mp.remove(id);
+                }
             }else{
                 //if we are in cleared state
-                if(mp.contains(id) && mp.get(id).getCleared().equals("true")) mp.remove(id);
                 device.setDeviceStatus("0");
             }
             device.setDeviceCode(id);
-            device.setMessage(mp.get(id).getAdditionalText());
+            //device.setMessage(mp.get(id).getAlarmName()+":" +mp.get(id).getAdditionalText());
             Date t = Date.from(time.atZone(Constant.DEFAULT_ZONE).toInstant());
             device.setMonitorTime(t);
             res.add(device);

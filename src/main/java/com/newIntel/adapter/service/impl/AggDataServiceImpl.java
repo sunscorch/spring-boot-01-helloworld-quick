@@ -97,8 +97,13 @@ public class AggDataServiceImpl implements AggDataService {
         CacheSIMap mp = CacheSIMap.getCacheMap();
         for (MaxViewSIData data : mpList) {
             String objID = data.getObjectId();
-            data.setTime(System.currentTimeMillis());
-            mp.put(objID, data);
+            if(objID == null) continue;
+            if(Constant.PHOPNE_OBJ_SET.contains(objID)){
+                mp.put(data.getObjectId(),data);
+                data.setTime(System.currentTimeMillis());
+                mp.put(objID, data);
+            }
+
         }
     }
 

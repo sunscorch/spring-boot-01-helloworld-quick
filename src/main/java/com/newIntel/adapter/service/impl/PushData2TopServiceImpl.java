@@ -193,7 +193,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
             throw e;
         }
 
-        log.info("send to top server fire alarm data : "+ jsonString);
+        log.info("send to top server fire device data : "+ jsonString);
         HttpEntity<String> entity = new HttpEntity<String>(jsonString,headers);
         String result = restTemplate.postForObject(url, entity, String.class);
         log.info("finish sending to top server  result :" + result);

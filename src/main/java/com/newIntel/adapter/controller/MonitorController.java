@@ -2,6 +2,7 @@ package com.newIntel.adapter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.newIntel.adapter.Cache.CacheAlarmMap;
+import com.newIntel.adapter.Cache.CacheSIMap;
 import com.newIntel.adapter.bean.*;
 import com.newIntel.adapter.config.SysConfComponent;
 import com.newIntel.adapter.constant.Constant;
@@ -63,6 +64,13 @@ public class MonitorController {
         //pushData2TopService.sendDeviceData();
     }
 
+    @GetMapping("/test4")
+    void getAiData4() throws Exception {
+
+        pushData2TopService.sendITCStatus();
+        //pushData2TopService.sendDeviceData();
+    }
+
     //api/v1/measvalue-ai
     @PostMapping("/api/v1/measvalue-ai")
     AjaxResult pushAIData(@RequestBody List<MaxViewAIData> mpList) {
@@ -91,7 +99,7 @@ public class MonitorController {
     @PostMapping("/api/v1/measvalue-si")
     AjaxResult pushSiData(@RequestBody List<MaxViewSIData> mpList){
         log.info("try to get SI value:"+String.valueOf(mpList));
-
+        aggDataService.aggSIdata(mpList);
         return AjaxResult.success("ok");
     }
 
@@ -105,7 +113,7 @@ public class MonitorController {
 
     @PostMapping("api/v1/new-alarms")
     AjaxResult pushNewAlarmData(@RequestBody List<MaxViewAlarm> mpList){
-        //log.info("try to get new Alarm:"+String.valueOf(mpList));
+        log.info("try to get new Alarm:"+String.valueOf(mpList));
         CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
         for(MaxViewAlarm alarm:mpList){
            String objId = alarm.getObjectId();
@@ -117,7 +125,7 @@ public class MonitorController {
 
     @PostMapping("api/v1/cleared-alarms")
     AjaxResult pushUpatedAlarmData(@RequestBody List<MaxViewAlarm> mpList){
-        //log.info("try to get new Alarm:"+String.valueOf(mpList));
+        log.info("try to get cleared Alarm:"+String.valueOf(mpList));
         CacheAlarmMap mp = CacheAlarmMap.getCacheMap();
         for(MaxViewAlarm alarm:mpList){
             String objId = alarm.getObjectId();
@@ -129,7 +137,7 @@ public class MonitorController {
 
     @PostMapping("/api/v1/structure-obj")
     AjaxResult pushStructData(@RequestBody List<List<Map<String,Object>>> mpList){
-        mpList.toString();
+        log.info("try to get struct object:"+String.valueOf(mpList));
         List<MaxViewCallRecord> resList = new ArrayList<>();
         for(List<Map<String,Object>> l : mpList){
             if(l==null || l.size() ==0) continue;
