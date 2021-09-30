@@ -70,6 +70,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
     @Override
     public void sendDeviceData() throws Exception {
         List<DeviceStatus> dataList =  getCacheDataService.getDeviceStatus();
+
         RestTemplate restTemplate = new RestTemplate();
 
         String url = sysConfComponent.getTopServerDeviceUrl();
@@ -98,6 +99,10 @@ public class PushData2TopServiceImpl implements PushData2TopService {
     @Override
     public void sendITCStatus() {
         List<ItcStatus> itcStatusList = getCacheDataService.getItcStatus();
+        if(itcStatusList == null || itcStatusList.size()==0){
+            log.info("there is no itcStatusList  now, break the send request");
+            return;
+        }
 
         RestTemplate restTemplate = new RestTemplate();
 

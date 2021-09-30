@@ -92,8 +92,10 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
 
             if((System.currentTimeMillis()-maxViewSIData.getTime())/1000L/60L > Constant.staleThreshold){
                 itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_OFF);
+            }else {
+                itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_ON);
             }
-            itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_ON);
+            //itcStatus.setDeviceStatus(Constant.TOPSERVER_ITC_OFF);
             res.add(itcStatus);
         }
         return res;
