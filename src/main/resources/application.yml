@@ -7,7 +7,7 @@ sysconf:
 
   top-server-ai-url: http://58.213.24.42:6347/ea-environ/xry/data/deviceDataReceive
   top-server-device-url: http://58.213.24.42:6347/ea-environ/xry/data/extDeviceStatusReceive
-  top-server-fire-alarm-url:
+  top-server-fire-alarm-url: http://logic.free.idcfengye.com/ea-fire/dataPush/device/enable
   top-server-phone-url: http://logic.free.idcfengye.com/otd-emergency/emergency/dataPush/xry
   phone-call-obj-id: 1018001010
 

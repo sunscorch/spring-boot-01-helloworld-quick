@@ -27,7 +27,8 @@ public class CronService {
         pushData2TopService.sendCallRecords();
     }
 
-   // @Scheduled(fixedDelayString = "${scheduled.fixedDelay}",initialDelayString = "${scheduled.initialDelay}"  )
+    //火灾告警
+    @Scheduled(fixedDelayString = "${scheduled.fixedDelay}",initialDelayString = "${scheduled.initialDelay}"  )
     public void sendFireDeviceStatus2TopServer() throws Exception{
         pushData2TopService.sendFireDeviceStatus();
     }

@@ -55,7 +55,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
         try{
             jsonString = mapper.writeValueAsString(dataList);
         }catch(Exception e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             log.error("failed json is" + dataList.toString());
             throw e;
         }
@@ -85,7 +85,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
         try{
             jsonString = mapper.writeValueAsString(dataList);
         }catch(Exception e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             log.error("failed json is" + dataList.toString());
             throw e;
         }
@@ -120,7 +120,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
             obj.putPOJO("data",itcStatusList);
             jsonString = obj.toString();
         }catch(Exception e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             log.error("failed json is" + itcStatusList.toString());
             throw e;
         }
@@ -158,7 +158,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
             obj.putPOJO("data",res);
             jsonString = obj.toString();
         }catch(Exception e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             log.error("failed json is" + res.toString());
             throw e;
         }
@@ -193,7 +193,7 @@ public class PushData2TopServiceImpl implements PushData2TopService {
         try{
             jsonString = mapper.writeValueAsString(dataList);
         }catch(Exception e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             log.error("failed json is" + dataList.toString());
             throw e;
         }

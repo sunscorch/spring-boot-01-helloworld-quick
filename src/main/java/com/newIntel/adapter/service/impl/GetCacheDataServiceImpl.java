@@ -114,6 +114,13 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
                 CallRecord r = new CallRecord();
                 String callSip = record.getFromTid();
                 String beCallSip = record.getToIid();
+                if(callSip.length() == 1 & callSip != null){
+                    callSip = "0" + callSip;
+                }
+                if(beCallSip.length() == 1 & beCallSip != null) {
+                    beCallSip = "0" + callSip;
+                }
+
                 String callDevice = "13"+callSip+"60"+callSip+callSip;
                 String beCallDevice = "13"+beCallSip+"60"+beCallSip+beCallSip;
                 r.setCallDevice(callDevice);
@@ -134,11 +141,11 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
                     r.setEndTime(et);
                 }catch (Exception e){
                     log.error(e.getMessage());
-                    log.error("fail to parse date time");
+                    log.error("fail to parse date time", e);
                 }
                 res.add(r);
             }catch (Exception e){
-                log.error(e.getMessage());
+                log.error(e.getMessage(),e);
                 log.error("fail to pop out element..." );
             }
         }
@@ -153,12 +160,13 @@ public class GetCacheDataServiceImpl implements GetCacheDataService {
             LocalDateTime time = LocalDateTime.now();
             FireDeviceStatus device = new FireDeviceStatus();
             if(mp.containsKey(id)){
-                //not clear
+                //not cleared alarm
                 device.setMessage(mp.get(id).getAlarmName()+":" +mp.get(id).getAdditionalText());
                 if(mp.get(id).getCleared() != null && mp.get(id).getCleared().equals("false")) device.setDeviceStatus("1");
+                //the alarm is cleared
                 else {
                     device.setDeviceStatus("0");
-                    device.setMessage(mp.get(id).getAdditionalText());
+                    device.setMessage("");
                     mp.remove(id);
                 }
             }else{
