@@ -137,8 +137,11 @@ public class AggDataServiceImpl implements AggDataService {
         String objectID = data.getObjectId();
         String deviceType = objectID.substring(4, 6);
         String cv = data.getCv();
-        long time = data.getTime();
-
+        Long time = data.getTime();
+        if(time == null || String.valueOf(time).length() != 13 ){
+            log.info("no time passed into , use current timestamp");
+            time = System.currentTimeMillis();
+        }
 
         switch (deviceType) {
             case Constant.CO_TYPE_CODE:
